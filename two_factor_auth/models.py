@@ -1,12 +1,15 @@
 
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 from django.db.models import (
     CASCADE,
     CharField,
+    IntegerField,
     DateTimeField,
     ForeignKey,
     Model,
     PositiveSmallIntegerField,
+    OneToOneField,
     TextField,
     UUIDField,
 )
@@ -21,25 +24,45 @@ class AnswerType:
         TEXT = (1, "Text")
         SELECT = (2, "Select")
 
-
-class User(AbstractUser):
+class BaseModel(Model):
     id = UUIDField(default=uuid4, primary_key=True, editable=False)
     created_at = DateTimeField(auto_now_add=True, editable=False)
     updated_at = DateTimeField(auto_now=True, editable=False)
 
+    class Meta:
+        abstract = True
 
-class Questions(Model):
-    id = UUIDField(default=uuid4, primary_key=True, editable=False)
+
+class User(AbstractUser, BaseModel):
+    pass
+
+
+class TwoFactorAuthenticationSession(BaseModel):
+    user = OneToOneField(get_user_model(), on_delete=CASCADE)
+    questions_attempted = IntegerField(null=True)
+    answer_verified = IntegerField(null=True)
+    last_answer_attempt = DateTimeField(null=True)
+    invalid_answer_attempts = IntegerField()
+
+    class Meta:
+        verbose_name = "2FA Session"
+        verbose_name_plural = "2FA Sessions"
+
+
+class Question(BaseModel):
     question_desc = TextField()
     answer_type = PositiveSmallIntegerField(default=AnswerType.TEXT, choices=AnswerType.CHOICES)
-    created_at = DateTimeField(auto_now_add=True, editable=False)
-    updated_at = DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        verbose_name = "Question"
+        verbose_name_plural = "Questions"
 
 
-class UserAnswer(Model):
-    id = UUIDField(default=uuid4, primary_key=True, editable=False)
-    django_user = ForeignKey(User, on_delete=CASCADE)
-    question = ForeignKey(Questions, on_delete=CASCADE)
+class UserAnswer(BaseModel):
+    django_user = ForeignKey(get_user_model(), on_delete=CASCADE)
+    question = ForeignKey(Question, on_delete=CASCADE)
     answer = TextField()
-    created_at = DateTimeField(auto_now_add=True, editable=False)
-    updated_at = DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        verbose_name = "User Answer"
+        verbose_name_plural = "User Answers"

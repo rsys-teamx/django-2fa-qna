@@ -10,6 +10,8 @@ Django = "^3.2.4"
 django-rest-framework = "^0.1.0"
 jwt = "^1.2.0"
 orm-choices = "^1.0.0"
+twine = "^3.4.1"
+TwoFactorAuthTeamx = "^0.1"
 
 [tool.poetry.dev-dependencies]
 
