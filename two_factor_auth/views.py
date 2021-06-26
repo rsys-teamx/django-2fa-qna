@@ -2,13 +2,15 @@ from hashlib import md5
 
 from django.contrib.auth import get_user_model, authenticate
 from django.db import transaction
-from rest_framework.authentication import BasicAuthentication
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+from rest_framework.views import APIView
+
 from two_factor_auth.auth import add_user_answer, validate_answer
 from two_factor_auth.models import UserAnswer
 from two_factor_auth.serializers import (
@@ -45,6 +47,8 @@ class QuestionViewSet(ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = (AllowAny,)
+    # authentication_classes = (TokenAuthentication, )
+    # permission_classes = (IsAuthenticated,)
 
 
 class VerifyAnswerViewSet(GenericAPIView):
@@ -132,3 +136,9 @@ class UserAuthAnswerView(GenericAPIView):
 
         return Response("success", status=status.HTTP_200_OK)
 
+
+class HomePage(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response("Hello World")
