@@ -23,4 +23,5 @@ api_v1_patterns = [
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(api_v1_patterns)),
+    path(r'api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
