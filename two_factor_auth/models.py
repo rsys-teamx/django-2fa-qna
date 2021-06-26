@@ -12,7 +12,9 @@ from django.db.models import (
     OneToOneField,
     TextField,
     UUIDField,
+    EmailField
 )
+from django.utils.translation import ugettext_lazy as _
 from orm_choices import choices
 from uuid import uuid4
 
@@ -35,7 +37,13 @@ class BaseModel(Model):
 
 
 class User(AbstractUser, BaseModel):
-    pass
+    email = EmailField(
+        _("email address"),
+        unique=True,
+        error_messages={
+            "unique": _("A user with that email already exists."),
+        },
+    )
 
 
 class TwoFactorAuthenticationSession(BaseModel):
