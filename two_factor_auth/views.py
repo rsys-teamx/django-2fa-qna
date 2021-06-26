@@ -1,3 +1,5 @@
+from hashlib import md5
+
 from django.contrib.auth import get_user_model, authenticate
 from django.db import transaction
 from rest_framework.authentication import BasicAuthentication
@@ -7,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from two_factor_auth.auth import add_user_answer
+from two_factor_auth.auth import add_user_answer, validate_answer
 from two_factor_auth.models import UserAnswer
 from two_factor_auth.serializers import (
     CreateUserSerializer, CreateUserAnswerSerializer
@@ -58,11 +60,15 @@ class VerifyAnswerViewSet(GenericAPIView):
             check_2fa_login_attempt(user_id)
 
             for rq in request.data.get("requests"):
+                question_id = rq.get("question_id")
+                answer_encode = md5(rq.get("answer").encode()).hexdigest()
+
                 answer = UserAnswer.objects.filter(
                     django_user_id=user_id,
-                    question_id=rq.get("question_id"),
-                    answer__exact=rq.get("answer")
+                    question_id=question_id,
+                    answer__exact=answer_encode
                 )
+
                 if answer.count() > 0:
                     answer_count += 1
 
