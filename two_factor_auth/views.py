@@ -1,8 +1,17 @@
-from django.contrib.auth import get_user_model
-from rest_framework import status
-from rest_framework.generics import ListAPIView, GenericAPIView
-from rest_framework.permissions import AllowAny
+from django.contrib.auth import get_user_model, authenticate
+from django.db import transaction
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from two_factor_auth.auth import add_user_answer
+from two_factor_auth.models import UserAnswer
+from two_factor_auth.serializers import (
+    CreateUserSerializer, CreateUserAnswerSerializer
+)
 
 from two_factor_auth.models import Question, UserAnswer
 from two_factor_auth.serializers import (
@@ -72,3 +81,47 @@ class VerifyAnswerViewSet(GenericAPIView):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserRegistrationViewSet(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = CreateUserSerializer
+    permission_classes = [AllowAny]
+
+
+class UserAuthAnswerView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        user_id = data.get("user_id")
+        requests_data = data.get("requests")
+        #TODO: add auth token for this user validation
+
+        try:
+            user_obj = User.objects.get(id=user_id, is_active=True)
+        except User.DoesNotExist:
+            return Response("User does not exist")
+        # allowed_answer = 1
+        # if allowed_answer > len(auth_answer):
+        #     return Response(
+        #         f'Please answer question at least {allowed_answer}',
+        #         status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            user_answer_serializer = CreateUserAnswerSerializer(
+                data=requests_data,
+                many=True,
+                context={
+                    'django_user': user_obj
+                }
+            )
+            if not user_answer_serializer.is_valid():
+                transaction.set_rollback(True)
+                return Response(
+                    user_answer_serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+            user_answer_serializer.save()
+
+        return Response("success", status=status.HTTP_200_OK)
+
