@@ -76,14 +76,9 @@ class VerifyAnswerSerializer(Serializer):
 
 
 class QuestionSerializer(ModelSerializer):
-    question = SerializerMethodField()
-
     class Meta:
-        model = UserAnswer
-        fields = ("id", "question")
-
-    def get_question(self, obj):
-        return obj.question.question_desc
+        model = Question
+        fields = "__all__"
 
 
 class CreateUserAnswerSerializer(ModelSerializer):
