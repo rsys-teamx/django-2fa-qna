@@ -1,54 +1,74 @@
-from django.conf import settings
-from django.contrib.auth import get_user_model, authenticate
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from django.contrib.auth import get_user_model
+from rest_framework import status
 from rest_framework.generics import ListAPIView, GenericAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from two_factor_auth.models import Question
-from two_factor_auth.serializers import QuestionSerializer, LoginSerializer
+from two_factor_auth.models import Question, UserAnswer
+from two_factor_auth.serializers import (
+    QuestionSerializer, LoginSerializer, UserAuthInputSerializer,
+    VerifyAnswerInputSerializer, VerifyAnswerSerializer
+)
 
 User = get_user_model()
 
 
-# class ExampleView(APIView):
-#     # authentication_classes = [SessionAuthentication, BasicAuthentication]
-#     # permission_classes = [IsAuthenticated]
-#
-#     def post(self, request, format=None):
-#         content = {
-#             'user': str(request.user),  # `django.contrib.auth.User` instance.
-#             'auth': str(request.auth),  # None
-#         }
-#         return Response(content)
-
-
-class ExampleView(GenericAPIView):
-    # serializer_class = settings.SERIALIZERS.user
-    # queryset = User.objects.all()
-
+class UserLogin(GenericAPIView):
     serializer_class = LoginSerializer
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        """User login with username and password."""
-        # token = AuthToken.objects.create(request.user)
-        authenticate(username="", password="")
-        return Response({
-            'user': self.get_serializer(request.user).data,
-        })
-
-    # def post(self, request, format=None):
-    #     content = {
-    #         'user': str(request.user),  # `django.contrib.auth.User` instance.
-    #         'auth': str(request.auth),  # None
-    #     }
-    #     return Response(content)
+        serializer = UserAuthInputSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            return Response(
+                {'user': self.get_serializer(user).data},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class QuestionViewSet(ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = [AllowAny]
+
+
+class VerifyAnswerViewSet(GenericAPIView):
+    serializer_class = VerifyAnswerSerializer
+
+    def post(self, request):
+        serializer = VerifyAnswerInputSerializer(data=request.data)
+        if serializer.is_valid():
+            answer_count = 0
+            min_answer_count = 1
+            user_id = request.data.get("user_id")
+            for rq in request.data.get("requests"):
+                answer = UserAnswer.objects.filter(
+                    django_user_id=user_id,
+                    question_id=rq.get("question_id"),
+                    answer__exact=rq.get("answer")
+                )
+                if answer.count() > 0:
+                    answer_count += 1
+
+            if answer_count >= min_answer_count:
+                # Todo: Reset Session
+                print(True)
+                data = dict()
+                data["token"] = "sdsdsd"
+                return Response(
+                    {'user': self.get_serializer(data).data},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                # Todo: Increment Session
+                print(False)
+                msg = dict()
+                msg["error"] = "Invalid Answers"
+                return Response(msg, status=status.HTTP_401_UNAUTHORIZED)
+
+            return Response(
+                {'user': self.get_serializer(data).data},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -35,13 +35,12 @@ def add_user_answer(**values):
     UserAnswer.objects.create(**values)
 
 
-def valdate_answer(user_id, question_id, answer):
+def validate_answer(user_id, question_id, answer):
     try:
         user_answer = UserAnswer.objects.get(user_id=user_id, question_id=question_id)
-        if user_anser.answer == md5(answer.encode()).hexdigest():
+        if user_answer.answer == md5(answer.encode()).hexdigest():
             return True
         else:
             return False
     except UserAnswer.DoesNotExist:
         return False
-
