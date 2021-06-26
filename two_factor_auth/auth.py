@@ -1,6 +1,6 @@
 
 from hashlib import md5
-from two_factor_auth.models import Questions, UserAnswer
+from two_factor_auth.models import Question, UserAnswer
 
 
 def AddQuestion(f):
@@ -27,7 +27,7 @@ def CheckAnswer(f):
 
 
 def add_question(**values):
-    Questions.objects.create(**values)
+    Question.objects.create(**values)
 
 
 def add_user_answer(**values):

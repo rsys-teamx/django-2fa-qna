@@ -1,14 +1,17 @@
 from django.contrib.auth import get_user_model, authenticate
-from rest_framework import serializers
-
-from two_factor_auth.models import Question, UserAnswer
+from rest_framework.serializers import (
+    Serializer, CharField, ValidationError, SerializerMethodField, UUIDField)
 
 User = get_user_model()
+from hashlib import md5
+from rest_framework.serializers import ModelSerializer
+from two_factor_auth.models import Question, UserAnswer
+from two_factor_auth.models import User
 
 
-class UserAuthInputSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+class UserAuthInputSerializer(Serializer):
+    username = CharField()
+    password = CharField()
 
     def validate(self, attrs):
         username = attrs.get('username')
@@ -20,28 +23,28 @@ class UserAuthInputSerializer(serializers.Serializer):
 
                 if not user.is_active:
                     msg = 'User account is disabled.'
-                    raise serializers.ValidationError(msg, code='authorization')
+                    raise ValidationError(msg, code='authorization')
 
             else:
                 msg = 'Unable to log in with provided credentials.'
-                raise serializers.ValidationError(msg, code='authorization')
+                raise ValidationError(msg, code='authorization')
 
         else:
             msg = 'Must include "username" and "password".'
-            raise serializers.ValidationError(msg, code='authorization')
+            raise ValidationError(msg, code='authorization')
 
         attrs['user'] = user
         return attrs
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = '__all__'
 
 
-class UserQuestionSerializer(serializers.ModelSerializer):
-    question = serializers.SerializerMethodField()
+class UserQuestionSerializer(ModelSerializer):
+    question = SerializerMethodField()
 
     class Meta:
         model = UserAnswer
@@ -51,8 +54,8 @@ class UserQuestionSerializer(serializers.ModelSerializer):
         return obj.question.question_desc
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    questions = serializers.SerializerMethodField()
+class LoginSerializer(ModelSerializer):
+    questions = SerializerMethodField()
 
     class Meta:
         model = User
@@ -63,9 +66,52 @@ class LoginSerializer(serializers.ModelSerializer):
             obj.useranswer_set.filter(), many=True).data
 
 
-class VerifyAnswerInputSerializer(serializers.Serializer):
-    user_id = serializers.CharField()
+class VerifyAnswerInputSerializer(Serializer):
+    user_id = CharField()
 
 
-class VerifyAnswerSerializer(serializers.Serializer):
-    token = serializers.CharField()
+class VerifyAnswerSerializer(Serializer):
+    token = CharField()
+
+
+class UserQuestionSerializer(ModelSerializer):
+    question = SerializerMethodField()
+
+    class Meta:
+        model = UserAnswer
+        fields = ("id", "question")
+
+    def get_question(self, obj):
+        return obj.question.question_desc
+
+
+class CreateUserAnswerSerializer(ModelSerializer):
+    question_id = UUIDField(required=True)
+
+    class Meta:
+        model = UserAnswer
+        fields = ('question_id', 'answer')
+
+    def create(self, validated_data):
+        django_user = self.context.get('django_user')
+        validated_data['django_user'] = django_user
+        validated_data['answer'] = md5(validated_data['answer'].encode()).hexdigest()
+        return UserAnswer.objects.create(**validated_data)
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
+class CreateUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'first_name', 'last_name', 'email', 'password'
+        )
+
+    def create(self, validated_data):
+        validated_data['username'] = validated_data['email']
+        return User.objects.create(**validated_data)
