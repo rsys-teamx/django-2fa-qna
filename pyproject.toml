@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "django-2fa-qna"
+version = "0.1.0"
+description = "2 factor authentication using questions and answers"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "^3.2.4"
+django-rest-framework = "^0.1.0"
+jwt = "^1.2.0"
+orm-choices = "^1.0.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
