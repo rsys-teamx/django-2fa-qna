@@ -13,11 +13,14 @@ from two_factor_auth.serializers import (
     CreateUserSerializer, CreateUserAnswerSerializer
 )
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from two_factor_auth.models import Question, UserAnswer
 from two_factor_auth.serializers import (
     QuestionSerializer, LoginSerializer, UserAuthInputSerializer,
     VerifyAnswerInputSerializer, VerifyAnswerSerializer
 )
+from two_factor_auth.utils import check_2fa_login_attempt, update_2fa_session
 
 User = get_user_model()
 
@@ -39,7 +42,7 @@ class UserLogin(GenericAPIView):
 class QuestionViewSet(ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
 
 
 class VerifyAnswerViewSet(GenericAPIView):
@@ -51,6 +54,9 @@ class VerifyAnswerViewSet(GenericAPIView):
             answer_count = 0
             min_answer_count = 1
             user_id = request.data.get("user_id")
+
+            check_2fa_login_attempt(user_id)
+
             for rq in request.data.get("requests"):
                 answer = UserAnswer.objects.filter(
                     django_user_id=user_id,
@@ -61,25 +67,20 @@ class VerifyAnswerViewSet(GenericAPIView):
                     answer_count += 1
 
             if answer_count >= min_answer_count:
-                # Todo: Reset Session
-                print(True)
                 data = dict()
-                data["token"] = "sdsdsd"
+                user = User.objects.get(id=user_id)
+                refresh = RefreshToken.for_user(user)
+                data['refresh'] = str(refresh)
+                data['access'] = str(refresh.access_token)
                 return Response(
-                    {'user': self.get_serializer(data).data},
+                    {'token': self.get_serializer(data).data},
                     status=status.HTTP_200_OK
                 )
             else:
-                # Todo: Increment Session
-                print(False)
+                update_2fa_session(user_id, True)
                 msg = dict()
                 msg["error"] = "Invalid Answers"
                 return Response(msg, status=status.HTTP_401_UNAUTHORIZED)
-
-            return Response(
-                {'user': self.get_serializer(data).data},
-                status=status.HTTP_200_OK
-            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

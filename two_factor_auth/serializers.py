@@ -71,10 +71,11 @@ class VerifyAnswerInputSerializer(Serializer):
 
 
 class VerifyAnswerSerializer(Serializer):
-    token = CharField()
+    refresh = CharField()
+    access = CharField()
 
 
-class UserQuestionSerializer(ModelSerializer):
+class QuestionSerializer(ModelSerializer):
     question = SerializerMethodField()
 
     class Meta:
