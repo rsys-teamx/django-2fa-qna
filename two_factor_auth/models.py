@@ -24,6 +24,7 @@ class AnswerType:
         TEXT = (1, "Text")
         SELECT = (2, "Select")
 
+
 class BaseModel(Model):
     id = UUIDField(default=uuid4, primary_key=True, editable=False)
     created_at = DateTimeField(auto_now_add=True, editable=False)
@@ -48,6 +49,9 @@ class TwoFactorAuthenticationSession(BaseModel):
         verbose_name = "2FA Session"
         verbose_name_plural = "2FA Sessions"
 
+    def __str__(self):
+        return self.id
+
 
 class Question(BaseModel):
     question_desc = TextField()
@@ -56,6 +60,9 @@ class Question(BaseModel):
     class Meta:
         verbose_name = "Question"
         verbose_name_plural = "Questions"
+
+    def __str__(self):
+        return self.question_desc
 
 
 class UserAnswer(BaseModel):
@@ -66,3 +73,6 @@ class UserAnswer(BaseModel):
     class Meta:
         verbose_name = "User Answer"
         verbose_name_plural = "User Answers"
+
+    def __str__(self):
+        return self.id
