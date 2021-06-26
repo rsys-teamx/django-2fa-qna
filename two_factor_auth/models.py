@@ -48,8 +48,8 @@ class User(AbstractUser, BaseModel):
 
 class TwoFactorAuthenticationSession(BaseModel):
     user = OneToOneField(get_user_model(), on_delete=CASCADE)
-    questions_attempted = IntegerField(null=True)
-    answer_verified = IntegerField(null=True)
+    # questions_attempted = IntegerField(null=True)
+    # answer_verified = IntegerField(null=True)
     last_answer_attempt = DateTimeField(null=True)
     invalid_answer_attempts = IntegerField()
 
