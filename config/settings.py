@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'two_factor_auth',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,4 @@ MIN_ANSWERS = 2
 QUESTION_CHANGE_FREQUENCY = 90  # days
 ANSWER_ATTEMPTS = 1  # 3 tries
 MAX_ANSWER_LENGTH = 12  # characters
+DEBUG = True
