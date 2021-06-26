@@ -58,7 +58,7 @@ class TwoFactorAuthenticationSession(BaseModel):
         verbose_name_plural = "2FA Sessions"
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class Question(BaseModel):
@@ -81,6 +81,7 @@ class UserAnswer(BaseModel):
     class Meta:
         verbose_name = "User Answer"
         verbose_name_plural = "User Answers"
+        unique_together = ['django_user', 'question']
 
     def __str__(self):
-        return self.id
+        return str(self.id)
