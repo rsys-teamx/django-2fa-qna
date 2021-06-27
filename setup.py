@@ -1,14 +1,14 @@
 from distutils.core import setup
 
 setup(
-    name="teamx-two-factor-auth",  # How you named your package folder (MyLib)
+    name="django-two-factor-auth-qna",  # How you named your package folder (MyLib)
     packages=[
         "two_factor_auth",
         "two_factor_auth/migrations",
     ],  # Chose the same as "name"
     version="0.0.7",  # Start with a small number and increase it with every change you make
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-    description="Package to enable two factor authentication using DRF",  # Give a short description about your library
+    description="Package to enable two factor authentication using Questions and answers",  # Give a short description about your library
     author="TeamX",  # Type in your name
     author_email="teamx@reckonsys.com",  # Type in your E-Mail
     url="https://github.com/rsys-teamx/django-2fa-qna",  # Provide either the link to your github or to your website
@@ -20,6 +20,7 @@ setup(
         "djangorestframework",
         "orm_choices",
         "djangorestframework-simplejwt",
+        "djangorestframework-camel-case"
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
