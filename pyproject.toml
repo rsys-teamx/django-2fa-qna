@@ -12,6 +12,7 @@ jwt = "^1.2.0"
 orm-choices = "^1.0.0"
 twine = "^3.4.1"
 djangorestframework-simplejwt = "^4.7.1"
+django-cors-headers = "^3.7.0"
 
 [tool.poetry.dev-dependencies]
 
