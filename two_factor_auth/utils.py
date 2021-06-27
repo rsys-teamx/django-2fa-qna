@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from django.conf import settings
 from django.db.models import F
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -13,7 +14,7 @@ registration_min_answer_count = getattr(
 retry_in_seconds = getattr(
     settings, "ANSWER_ATTEMPTS_RETRY_LIFETIME", timedelta(hours=1)
 )
-invalid_attempt_limit = getattr(settings, "INVALID_ATTEMPTS_LIMIT", 3)
+invalid_attempt_limit = getattr(settings, "INVALID_ATTEMPTS_LIMIT", 1)
 
 
 def update_2fa_session(user_id, invalid_attempt=False):
