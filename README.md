@@ -15,6 +15,8 @@
             ..,
             ..,
             'two_factor_auth',
+            'rest_framework',
+            'rest_framework.authtoken',
             ..,
         ]
 
@@ -31,11 +33,14 @@
 
         python manage.py migrate
 
-- Add two factor auth urls to urls.py
+- Add two factor auth urls to urls.py 
 
         url_patterns = [
             ..,
             ..,
-            include('', include('two_factor_auth.urls'))
+            path('2fa/', include('two_factor_auth.urls'))
         ]
+
+
+- Run server
 
