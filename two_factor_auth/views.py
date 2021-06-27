@@ -24,13 +24,17 @@ from two_factor_auth.serializers import (
     QuestionSerializer, LoginSerializer, UserAuthInputSerializer,
     VerifyAnswerInputSerializer, VerifyAnswerSerializer
 )
-from two_factor_auth.utils import check_2fa_login_attempt, update_2fa_session
+from two_factor_auth.utils import (
+    check_2fa_login_attempt, update_2fa_session, invalid_attempt_limit,
+    registration_questions_count, registration_min_answer_count, retry_in_seconds
+)
 
 User = get_user_model()
 
 
 class UserLogin(GenericAPIView):
     serializer_class = LoginSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = UserAuthInputSerializer(data=request.data)
@@ -53,13 +57,13 @@ class QuestionViewSet(ListAPIView):
 
 class VerifyAnswerViewSet(GenericAPIView):
     serializer_class = VerifyAnswerSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = VerifyAnswerInputSerializer(data=request.data)
         if serializer.is_valid():
-            answer_count = 0
-            min_answer_count = 1
-            user_id = request.data.get("user_id")
+            answer_count_temp = 0
+            user_id = request.user.id
 
             check_2fa_login_attempt(user_id)
 
@@ -74,9 +78,9 @@ class VerifyAnswerViewSet(GenericAPIView):
                 )
 
                 if answer.count() > 0:
-                    answer_count += 1
+                    answer_count_temp += 1
 
-            if answer_count >= min_answer_count:
+            if answer_count_temp >= invalid_attempt_limit:
                 data = dict()
                 user = User.objects.get(id=user_id)
                 refresh = RefreshToken.for_user(user)
@@ -97,11 +101,11 @@ class VerifyAnswerViewSet(GenericAPIView):
 class UserRegistrationViewSet(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = CreateUserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
 
 
 class UserAuthAnswerView(GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         data = request.data
@@ -142,3 +146,16 @@ class HomePage(APIView):
 
     def get(self, request):
         return Response("Hello World")
+
+
+class Config(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        return Response({"Config": {
+            "registration_questions_count": registration_questions_count,
+            "registration_min_answer_count": registration_min_answer_count,
+            "retry_in_seconds": retry_in_seconds,
+            "invalid_attempt_limit": invalid_attempt_limit
+            }
+        })
