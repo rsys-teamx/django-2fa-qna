@@ -1,8 +1,7 @@
 from hashlib import md5
 
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,23 +9,26 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from two_factor_auth.auth import add_user_answer, validate_answer
-from two_factor_auth.models import UserAnswer
 from two_factor_auth.serializers import (
     CreateUserSerializer, CreateUserAnswerSerializer
 )
-
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from two_factor_auth.models import Question, UserAnswer
 from two_factor_auth.serializers import (
-    QuestionSerializer, LoginSerializer, UserAuthInputSerializer,
-    VerifyAnswerInputSerializer, VerifyAnswerSerializer
+    QuestionSerializer,
+    LoginSerializer,
+    UserAuthInputSerializer,
+    VerifyAnswerInputSerializer,
+    VerifyAnswerSerializer,
 )
 from two_factor_auth.utils import (
-    check_2fa_login_attempt, update_2fa_session, invalid_attempt_limit,
-    registration_questions_count, registration_min_answer_count, retry_in_seconds
+    check_2fa_login_attempt,
+    update_2fa_session,
+    invalid_attempt_limit,
+    registration_questions_count,
+    registration_min_answer_count,
+    retry_in_seconds,
 )
 
 User = get_user_model()
@@ -39,10 +41,9 @@ class UserLogin(GenericAPIView):
     def post(self, request):
         serializer = UserAuthInputSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data['user']
+            user = serializer.validated_data["user"]
             return Response(
-                {'user': self.get_serializer(user).data},
-                status=status.HTTP_200_OK
+                {"user": self.get_serializer(user).data}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -51,8 +52,6 @@ class QuestionViewSet(ListAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = (AllowAny,)
-    # authentication_classes = (TokenAuthentication, )
-    # permission_classes = (IsAuthenticated,)
 
 
 class VerifyAnswerViewSet(GenericAPIView):
@@ -74,7 +73,7 @@ class VerifyAnswerViewSet(GenericAPIView):
                 answer = UserAnswer.objects.filter(
                     django_user_id=user_id,
                     question_id=question_id,
-                    answer__exact=answer_encode
+                    answer__exact=answer_encode,
                 )
 
                 if answer.count() > 0:
@@ -84,11 +83,10 @@ class VerifyAnswerViewSet(GenericAPIView):
                 data = dict()
                 user = User.objects.get(id=user_id)
                 refresh = RefreshToken.for_user(user)
-                data['refresh'] = str(refresh)
-                data['access'] = str(refresh.access_token)
+                data["refresh"] = str(refresh)
+                data["access"] = str(refresh.access_token)
                 return Response(
-                    {'token': self.get_serializer(data).data},
-                    status=status.HTTP_200_OK
+                    {"token": self.get_serializer(data).data}, status=status.HTTP_200_OK
                 )
             else:
                 update_2fa_session(user_id, True)
@@ -111,7 +109,7 @@ class UserAuthAnswerView(GenericAPIView):
         data = request.data
         user_id = data.get("user_id")
         requests_data = data.get("requests")
-        #TODO: add auth token for this user validation
+        # TODO: add auth token for this user validation
 
         try:
             user_obj = User.objects.get(id=user_id, is_active=True)
@@ -125,37 +123,29 @@ class UserAuthAnswerView(GenericAPIView):
 
         with transaction.atomic():
             user_answer_serializer = CreateUserAnswerSerializer(
-                data=requests_data,
-                many=True,
-                context={
-                    'django_user': user_obj
-                }
+                data=requests_data, many=True, context={"django_user": user_obj}
             )
             if not user_answer_serializer.is_valid():
                 transaction.set_rollback(True)
                 return Response(
-                    user_answer_serializer.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
+                    user_answer_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
             user_answer_serializer.save()
 
         return Response("success", status=status.HTTP_200_OK)
-
-
-class HomePage(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        return Response("Hello World")
 
 
 class Config(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
-        return Response({"Config": {
-            "registration_questions_count": registration_questions_count,
-            "registration_min_answer_count": registration_min_answer_count,
-            "retry_in_seconds": retry_in_seconds,
-            "invalid_attempt_limit": invalid_attempt_limit
+        return Response(
+            {
+                "Config": {
+                    "registration_questions_count": registration_questions_count,
+                    "registration_min_answer_count": registration_min_answer_count,
+                    "retry_in_seconds": retry_in_seconds,
+                    "invalid_attempt_limit": invalid_attempt_limit,
+                }
             }
-        })
+        )
