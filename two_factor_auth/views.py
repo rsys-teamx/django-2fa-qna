@@ -2,6 +2,7 @@ from hashlib import md5
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -55,8 +56,9 @@ class QuestionViewSet(ListAPIView):
 
 
 class VerifyAnswerViewSet(GenericAPIView):
-    serializer_class = VerifyAnswerSerializer
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    serializer_class = VerifyAnswerSerializer
 
     def post(self, request):
         serializer = VerifyAnswerInputSerializer(data=request.data)
@@ -103,16 +105,17 @@ class UserRegistrationViewSet(CreateAPIView):
 
 
 class UserAuthAnswerView(GenericAPIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         data = request.data
-        user_id = data.get("user_id")
         requests_data = data.get("requests")
+        print(requests_data)
         # TODO: add auth token for this user validation
 
         try:
-            user_obj = User.objects.get(id=user_id, is_active=True)
+            user_obj = User.objects.get(id=request.user.id, is_active=True)
         except User.DoesNotExist:
             return Response("User does not exist")
         # allowed_answer = 1

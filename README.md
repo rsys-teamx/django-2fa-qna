@@ -45,5 +45,12 @@
         ]
 
 
+- To add questions 
+ 
+         ./manage.py createsuperuser   # enter creadentials
+         ./manage.py runserver  
+         #  open server_address:port/admin  , login and add/import questions
+
+
 - Run server
 
