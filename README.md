@@ -2,6 +2,9 @@
 
  Python Package - [Teamx Two Factor Authentication](https://pypi.org/project/teamx-two-factor-auth/)
 
+We are using Both Django DRF - TokenAuthentication and djangorestframework-simplejwt.
+2FA will be using JWT Tokens to Authenticate. TokenAuthentication is used in Register and Login endpoints to generate token for temporary user authentication.
+
 
 ## to run
 
@@ -53,4 +56,6 @@
 
 
 - Run server
+
+Using Black for Python Lint Validation
 
