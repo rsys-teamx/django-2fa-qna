@@ -100,6 +100,7 @@ class UserSerializer(ModelSerializer):
 
 
 class CreateUserSerializer(ModelSerializer):
+    password = CharField(write_only=True)
     auth_token = CharField(required=False)
 
     class Meta:
@@ -108,7 +109,7 @@ class CreateUserSerializer(ModelSerializer):
 
     def create(self, validated_data):
         validated_data["username"] = validated_data["email"]
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
         token, created = Token.objects.get_or_create(user=user)
         user.auth_token = token
         user.save()
