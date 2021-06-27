@@ -124,18 +124,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# REST_FRAMEWORK = {
-#     # Use Django's standard `django.contrib.auth` permissions,
-#     # or allow read-only access for unauthenticated users.
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-#     ]
-# }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -167,8 +157,12 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=1),
 }
 
-MIN_QUESTIONS = 3  
-MIN_ANSWERS = 2  
-QUESTION_CHANGE_FREQUENCY = 90  # days
-ANSWER_ATTEMPTS = 1  # 3 tries
-MAX_ANSWER_LENGTH = 12  # characters
+# 2FA
+REGISTRATION_QUESTIONS_COUNT = 3
+USER_REGISTRATION_MIN_ANSWER_COUNT = 2
+INVALID_ATTEMPTS_LIMIT = 3
+ANSWER_ATTEMPTS_RETRY_LIFETIME = datetime.timedelta(minutes=1)
+USER_QUESTION_CHANGE_FREQUENCY = datetime.timedelta(days=60)
+MAX_ANSWER_CHARACTER_LENGTH = 12
+
+

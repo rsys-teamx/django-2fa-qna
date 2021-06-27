@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
+from django.db.models import TextField
+from rest_framework.fields import ListField, DictField
 from rest_framework.serializers import (
     Serializer, CharField, ValidationError, SerializerMethodField, UUIDField)
 
@@ -66,8 +68,13 @@ class LoginSerializer(ModelSerializer):
             obj.useranswer_set.filter(), many=True).data
 
 
+class AnswerRequestInputSerializer(Serializer):
+    question_id = CharField()
+    answer = CharField()
+
+
 class VerifyAnswerInputSerializer(Serializer):
-    user_id = CharField()
+    requests = AnswerRequestInputSerializer(many=True)
 
 
 class VerifyAnswerSerializer(Serializer):
