@@ -10,9 +10,9 @@ We are using Both Django DRF - TokenAuthentication and djangorestframework-simpl
 
 - Install twofactorauth
 
-        pip install teamx-two-factor-auth
+        pip install django-two-factor-auth-qna
                     (or)
-        poetry add teamx-two-factor-auth
+        poetry add django-two-factor-auth-qna
 
 - Add to INSTALLED_APPS in settings.py
 
