@@ -13,5 +13,5 @@ urlpatterns = [
         view.VerifyAnswerViewSet.as_view(),
         name="2fa-verify-answer",
     ),
-    path(r"auth-questions/", view.UserAuthAnswerView.as_view(), name="auth-questions")
+    path(r"auth-questions/", view.UserAuthAnswerView.as_view(), name="auth-questions"),
 ]

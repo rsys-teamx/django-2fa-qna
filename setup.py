@@ -14,7 +14,13 @@ setup(
     url="https://github.com/rsys-teamx/django-2fa-qna",  # Provide either the link to your github or to your website
     download_url="https://github.com/rsys-teamx/django-2fa-qna/",
     keywords=["2FA", "Reckonsys Hackathon Submission", "team"],
-    install_requires=["jwt", "Django", "djangorestframework", "orm_choices", "djangorestframework-simplejwt"],
+    install_requires=[
+        "jwt",
+        "Django",
+        "djangorestframework",
+        "orm_choices",
+        "djangorestframework-simplejwt",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers

@@ -3,7 +3,6 @@ from hashlib import md5
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -13,9 +12,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from two_factor_auth.serializers import (
-    CreateUserSerializer, CreateUserAnswerSerializer
-)
+from two_factor_auth.serializers import CreateUserSerializer, CreateUserAnswerSerializer
 from two_factor_auth.models import Question, UserAnswer
 from two_factor_auth.serializers import (
     QuestionSerializer,
@@ -44,7 +41,6 @@ class UserLogin(GenericAPIView):
         serializer = UserAuthInputSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data["user"]
-            Token.objects.get_or_create(user=user)
             return Response(
                 {"user": self.get_serializer(user).data}, status=status.HTTP_200_OK
             )
