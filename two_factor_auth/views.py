@@ -109,19 +109,10 @@ class UserAuthAnswerView(GenericAPIView):
     def post(self, request):
         data = request.data
         requests_data = data.get("requests")
-        print(requests_data)
-        # TODO: add auth token for this user validation
-
         try:
             user_obj = User.objects.get(id=request.user.id, is_active=True)
         except User.DoesNotExist:
             return Response("User does not exist")
-        # allowed_answer = 1
-        # if allowed_answer > len(auth_answer):
-        #     return Response(
-        #         f'Please answer question at least {allowed_answer}',
-        #         status=status.HTTP_400_BAD_REQUEST)
-
         with transaction.atomic():
             user_answer_serializer = CreateUserAnswerSerializer(
                 data=requests_data, many=True, context={"django_user": user_obj}
