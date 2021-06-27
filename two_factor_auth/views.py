@@ -12,9 +12,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from two_factor_auth.serializers import (
-    CreateUserSerializer, CreateUserAnswerSerializer
-)
+from two_factor_auth.serializers import CreateUserSerializer, CreateUserAnswerSerializer
 from two_factor_auth.models import Question, UserAnswer
 from two_factor_auth.serializers import (
     QuestionSerializer,

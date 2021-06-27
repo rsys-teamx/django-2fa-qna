@@ -67,7 +67,14 @@ class LoginSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "questions", "auth_token")
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "questions",
+            "auth_token",
+        )
 
     def get_questions(self, obj):
         return UserQuestionSerializer(obj.useranswer_set.filter(), many=True).data
