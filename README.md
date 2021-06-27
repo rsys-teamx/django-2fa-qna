@@ -1,6 +1,6 @@
 # django-2fa-qna
 
- Python Package - [Teamx Two Factor Authentication](https://pypi.org/project/teamx-two-factor-auth/)
+ Python Package - [Django Two Factor Auth QnA](https://pypi.org/project/django-two-factor-auth-qna/)
 
 We are using Both Django DRF - TokenAuthentication and djangorestframework-simplejwt.
 2FA will be using JWT Tokens to Authenticate. TokenAuthentication is used in Register and Login endpoints to generate token for temporary user authentication.
