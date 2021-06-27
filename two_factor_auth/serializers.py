@@ -52,11 +52,15 @@ class QuestionSerializer(ModelSerializer):
 
 
 class UserQuestionSerializer(ModelSerializer):
+    id = SerializerMethodField()
     question = SerializerMethodField()
 
     class Meta:
         model = UserAnswer
         fields = ("id", "question")
+
+    def get_id(self, obj):
+        return obj.question.id
 
     def get_question(self, obj):
         return obj.question.question_desc
