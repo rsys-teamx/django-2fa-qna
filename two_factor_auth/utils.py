@@ -42,8 +42,10 @@ def check_2fa_login_attempt(user_id):
                 < retry_in_seconds
             ):  # noqa
                 rem = (
-                    session.last_answer_attempt + retry_in_seconds
-                    - datetime.now(timezone.utc) + timedelta(minutes=0)
+                    session.last_answer_attempt
+                    + retry_in_seconds
+                    - datetime.now(timezone.utc)
+                    + timedelta(minutes=0)
                 )
                 msg["error"] = f"Invalid Attempts Exceeded, Try After {rem}"
                 raise ValidationError(msg, code="authorization")

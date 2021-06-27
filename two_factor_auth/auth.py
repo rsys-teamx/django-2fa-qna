@@ -1,4 +1,3 @@
-
 from hashlib import md5
 from two_factor_auth.models import Question, UserAnswer
 
@@ -6,23 +5,24 @@ from two_factor_auth.models import Question, UserAnswer
 def AddQuestion(f):
     def wrapper(*args, **kwargs):
         add_question(**kwargs)
+
     return wrapper
 
 
 def AddUserAnswer(f):
     def wrapper(*args, **kwargs):
         add_user_answer(**kwargs)
+
     return wrapper
 
 
 def CheckAnswer(f):
     def wrapper(*args, **kwargs):
         validated = validate_answer(
-            kwargs["user_id"],
-            kwargs["question_id"],
-            kwargs["answer"]
+            kwargs["user_id"], kwargs["question_id"], kwargs["answer"]
         )
         return f(*args, **kwargs) if validated else None
+
     return wrapper
 
 

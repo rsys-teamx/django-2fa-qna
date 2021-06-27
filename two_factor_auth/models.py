@@ -1,9 +1,6 @@
-
-from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.db.models import (
     CASCADE,
-    CharField,
     IntegerField,
     DateTimeField,
     ForeignKey,
@@ -12,11 +9,11 @@ from django.db.models import (
     OneToOneField,
     TextField,
     UUIDField,
-    EmailField
 )
-from django.utils.translation import ugettext_lazy as _
 from orm_choices import choices
 from uuid import uuid4
+
+User = get_user_model()
 
 
 @choices
@@ -36,20 +33,8 @@ class BaseModel(Model):
         abstract = True
 
 
-class User(AbstractUser, BaseModel):
-    email = EmailField(
-        _("email address"),
-        unique=True,
-        error_messages={
-            "unique": _("A user with that email already exists."),
-        },
-    )
-
-
 class TwoFactorAuthenticationSession(BaseModel):
-    user = OneToOneField(get_user_model(), on_delete=CASCADE)
-    # questions_attempted = IntegerField(null=True)
-    # answer_verified = IntegerField(null=True)
+    user = OneToOneField(User, on_delete=CASCADE)
     last_answer_attempt = DateTimeField(null=True)
     invalid_answer_attempts = IntegerField()
 
@@ -63,7 +48,9 @@ class TwoFactorAuthenticationSession(BaseModel):
 
 class Question(BaseModel):
     question_desc = TextField()
-    answer_type = PositiveSmallIntegerField(default=AnswerType.TEXT, choices=AnswerType.CHOICES)
+    answer_type = PositiveSmallIntegerField(
+        default=AnswerType.TEXT, choices=AnswerType.CHOICES
+    )
 
     class Meta:
         verbose_name = "Question"
@@ -74,14 +61,14 @@ class Question(BaseModel):
 
 
 class UserAnswer(BaseModel):
-    django_user = ForeignKey(get_user_model(), on_delete=CASCADE)
+    django_user = ForeignKey(User, on_delete=CASCADE)
     question = ForeignKey(Question, on_delete=CASCADE)
     answer = TextField()
 
     class Meta:
         verbose_name = "User Answer"
         verbose_name_plural = "User Answers"
-        unique_together = ['django_user', 'question']
+        unique_together = ["django_user", "question"]
 
     def __str__(self):
         return str(self.id)
